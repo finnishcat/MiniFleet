@@ -42,17 +42,116 @@ function App() {
       setLoading(true);
       setError(null);
 
-      // Fetch Docker status
+      // For demo purposes, if Docker is not available, show mock data
       const statusResponse = await fetch(`${backendUrl}/api/docker/status`);
+      
       if (statusResponse.status === 503) {
-        // Docker is not available
-        setError('Docker is not available on this server');
+        // Show mock data for demo
+        console.log('Docker not available, showing demo data...');
+        setDockerStatus({
+          status: "demo",
+          containers_running: 3,
+          containers_stopped: 1,
+          images: 5,
+          server_version: "Demo Mode",
+          architecture: "x86_64"
+        });
+        
+        // Mock containers
+        setContainers([
+          {
+            id: "demo-nginx",
+            name: "nginx-web",
+            image: "nginx:latest",
+            status: "running",
+            state: "running",
+            uptime: "2h 15m",
+            short_id: "abc123"
+          },
+          {
+            id: "demo-postgres",
+            name: "postgres-db",
+            image: "postgres:14",
+            status: "running",
+            state: "running",
+            uptime: "1d 5h",
+            short_id: "def456"
+          },
+          {
+            id: "demo-redis",
+            name: "redis-cache",
+            image: "redis:7",
+            status: "running",
+            state: "running",
+            uptime: "3h 22m",
+            short_id: "ghi789"
+          },
+          {
+            id: "demo-stopped",
+            name: "old-container",
+            image: "ubuntu:20.04",
+            status: "exited",
+            state: "exited",
+            uptime: null,
+            short_id: "jkl012"
+          }
+        ]);
+        
+        // Mock images
+        setImages([
+          {
+            id: "img-nginx",
+            short_id: "sha256:abc123",
+            tag: "nginx:latest",
+            created: "2024-01-15T10:30:00Z",
+            size: 142000000,
+            virtual_size: 142000000,
+            architecture: "amd64"
+          },
+          {
+            id: "img-postgres",
+            short_id: "sha256:def456",
+            tag: "postgres:14",
+            created: "2024-01-10T08:15:00Z",
+            size: 374000000,
+            virtual_size: 374000000,
+            architecture: "amd64"
+          },
+          {
+            id: "img-redis",
+            short_id: "sha256:ghi789",
+            tag: "redis:7",
+            created: "2024-01-08T14:22:00Z",
+            size: 117000000,
+            virtual_size: 117000000,
+            architecture: "amd64"
+          },
+          {
+            id: "img-node",
+            short_id: "sha256:jkl012",
+            tag: "node:18-alpine",
+            created: "2024-01-05T16:45:00Z",
+            size: 169000000,
+            virtual_size: 169000000,
+            architecture: "amd64"
+          },
+          {
+            id: "img-ubuntu",
+            short_id: "sha256:mno345",
+            tag: "ubuntu:20.04",
+            created: "2024-01-01T12:00:00Z",
+            size: 72000000,
+            virtual_size: 72000000,
+            architecture: "amd64"
+          }
+        ]);
+        
         setLoading(false);
         return;
-      } else if (!statusResponse.ok) {
-        throw new Error('Failed to fetch Docker status');
       }
-      
+
+      // If Docker is available, fetch real data
+      if (!statusResponse.ok) throw new Error('Failed to fetch Docker status');
       const statusData = await statusResponse.json();
       setDockerStatus(statusData);
 
