@@ -44,7 +44,15 @@ function App() {
 
       // Fetch Docker status
       const statusResponse = await fetch(`${backendUrl}/api/docker/status`);
-      if (!statusResponse.ok) throw new Error('Failed to fetch Docker status');
+      if (statusResponse.status === 503) {
+        // Docker is not available
+        setError('Docker is not available on this server');
+        setLoading(false);
+        return;
+      } else if (!statusResponse.ok) {
+        throw new Error('Failed to fetch Docker status');
+      }
+      
       const statusData = await statusResponse.json();
       setDockerStatus(statusData);
 
