@@ -295,6 +295,9 @@ function App() {
             <div className="text-gray-300">
               <p className="text-sm">Server: localhost</p>
               <p className="text-sm">Docker: {dockerStatus?.server_version}</p>
+              {dockerStatus?.status === 'demo' && (
+                <p className="text-xs text-yellow-400 mt-1">⚠️ Demo Mode - Mock Data</p>
+              )}
             </div>
           </div>
 
