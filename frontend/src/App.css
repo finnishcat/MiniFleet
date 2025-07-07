@@ -1,38 +1,132 @@
-.App {
-    text-align: center;
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+::-webkit-scrollbar-track {
+  background: rgba(55, 65, 81, 0.3);
+  border-radius: 4px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.6);
+  border-radius: 4px;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.8);
 }
 
-.App-link {
-    color: #61dafb;
+/* Custom animation for container cards */
+.container-card {
+  transition: all 0.3s ease;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.container-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom backdrop blur for better readability */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* Loading animation */
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+/* Custom modal overlay */
+.modal-overlay {
+  backdrop-filter: blur(4px);
+}
+
+/* Terminal-like logs styling */
+.logs-container {
+  font-family: 'Courier New', monospace;
+  line-height: 1.4;
+}
+
+/* Status indicator animations */
+.status-indicator {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.status-indicator.running {
+  animation: none;
+}
+
+/* Hover effects for image cards */
+.image-card {
+  transition: all 0.3s ease;
+}
+
+.image-card:hover {
+  transform: scale(1.05);
+}
+
+.image-card:hover .image-details {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.image-details {
+  opacity: 0;
+  transform: translateY(100%);
+  transition: all 0.3s ease;
+}
+
+/* Custom button animations */
+.btn-primary {
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Background image overlay */
+.bg-overlay {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Custom focus styles */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: auto;
+    max-height: 50vh;
+    z-index: 40;
+  }
+  
+  .main-content {
+    margin-top: 50vh;
+  }
 }
