@@ -149,8 +149,34 @@ function App() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-red-500 text-xl">Error: {error}</div>
+      <div 
+        className="min-h-screen bg-cover bg-center bg-fixed flex items-center justify-center"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${backgroundImage || 'https://images.unsplash.com/photo-1661064941810-7a62f443fdb1'})`
+        }}
+      >
+        <div className="bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-lg p-8 max-w-md text-center">
+          <div className="text-6xl mb-4">🐳</div>
+          <h1 className="text-2xl font-bold text-white mb-4">Docker Monitor</h1>
+          <div className="text-red-400 mb-4">
+            <p className="text-lg font-semibold">Docker Not Available</p>
+            <p className="text-sm">Docker is not running on this server</p>
+          </div>
+          <div className="text-gray-300 text-sm">
+            <p>To use this dashboard, please ensure:</p>
+            <ul className="mt-2 space-y-1 text-left">
+              <li>• Docker is installed and running</li>
+              <li>• Docker socket is accessible</li>
+              <li>• Proper permissions are configured</li>
+            </ul>
+          </div>
+          <button
+            onClick={fetchData}
+            className="mt-6 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors"
+          >
+            Retry Connection
+          </button>
+        </div>
       </div>
     );
   }
