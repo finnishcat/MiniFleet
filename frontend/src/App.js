@@ -287,6 +287,13 @@ function App() {
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${backgroundImage})`
       }}
     >
+      {/* Demo Mode Banner */}
+      {dockerStatus?.status === 'demo' && (
+        <div className="bg-yellow-600 bg-opacity-90 text-white text-center py-2 px-4 text-sm">
+          <span className="font-medium">🚧 Demo Mode</span> - Showing mock data since Docker is not available in this environment
+        </div>
+      )}
+      
       <div className="flex min-h-screen">
         {/* Right Sidebar */}
         <div className="w-80 bg-gray-800 bg-opacity-90 backdrop-blur-sm p-6 overflow-y-auto">
