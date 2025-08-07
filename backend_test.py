@@ -4,6 +4,7 @@ import sys
 import os
 import json
 from datetime import datetime
+import uuid
 
 class DockerMonitorAPITester(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -12,6 +13,8 @@ class DockerMonitorAPITester(unittest.TestCase):
         self.base_url = "https://7df86c00-9eb7-4488-bc90-62b661914306.preview.emergentagent.com"
         self.local_url = "http://localhost:8001"  # For local testing
         self.container_id = "test_container_id"  # Dummy ID for testing
+        self.test_server_id = f"test-server-{uuid.uuid4().hex[:8]}"
+        self.test_registry_id = f"test-registry-{uuid.uuid4().hex[:8]}"
 
     def test_01_docker_status(self):
         """Test Docker status endpoint"""
