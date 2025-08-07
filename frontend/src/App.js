@@ -49,7 +49,49 @@ function App() {
     }
   };
 
-  const fetchData = async () => {
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch(`${backendUrl}/api/notifications`);
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications);
+      }
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+    }
+  };
+
+  const checkImageUpdates = async () => {
+    try {
+      const updates = {};
+      for (const image of images.slice(0, 5)) { // Check first 5 images to avoid rate limits
+        const response = await fetch(`${backendUrl}/api/images/${encodeURIComponent(image.tag)}/check-updates`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.has_updates) {
+            updates[image.tag] = data;
+            
+            // Create notification for updates
+            await fetch(`${backendUrl}/api/notifications`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: `update-${image.tag}-${Date.now()}`,
+                type: 'image_update',
+                title: 'New Image Version Available',
+                message: `${image.tag} has ${data.available_tags.length} available tags`,
+                image: image.tag,
+                severity: 'info'
+              })
+            });
+          }
+        }
+      }
+      setImageUpdates(updates);
+    } catch (err) {
+      console.error('Failed to check image updates:', err);
+    }
+  };
     try {
       setLoading(true);
       setError(null);
