@@ -66,6 +66,65 @@ function App() {
     }
   };
 
+  const fetchDockerServers = async () => {
+    try {
+      const response = await fetch(`${backendUrl}/api/docker/servers`);
+      if (response.ok) {
+        const data = await response.json();
+        setDockerServers(data.servers);
+      }
+    } catch (err) {
+      console.error('Failed to fetch Docker servers:', err);
+    }
+  };
+
+  const switchServer = (serverId) => {
+    setActiveServer(serverId);
+    fetchData();  // Refetch data for the new server
+  };
+
+  const deployContainer = async (deploymentConfig) => {
+    try {
+      const response = await fetch(`${backendUrl}/api/deploy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...deploymentConfig,
+          server_id: activeServer
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setNotifications(prev => [{
+          id: `deploy-${Date.now()}`,
+          type: 'success',
+          title: 'Deployment Successful',
+          message: result.message,
+          created_at: new Date().toISOString(),
+          read: false
+        }, ...prev]);
+        
+        // Refresh data
+        fetchData();
+        setShowDeployModal(false);
+        return result;
+      } else {
+        throw new Error('Deployment failed');
+      }
+    } catch (err) {
+      console.error('Failed to deploy container:', err);
+      setNotifications(prev => [{
+        id: `deploy-error-${Date.now()}`,
+        type: 'error',
+        title: 'Deployment Failed',
+        message: `Failed to deploy container: ${err.message}`,
+        created_at: new Date().toISOString(),
+        read: false
+      }, ...prev]);
+    }
+  };
+
   const fetchNotifications = async () => {
     try {
       const response = await fetch(`${backendUrl}/api/notifications`);
