@@ -258,7 +258,41 @@ function App() {
     }
   };
 
-  const handleContainerClick = async (container) => {
+  const fetchContainerYaml = async (containerId) => {
+    try {
+      const response = await fetch(`${backendUrl}/api/containers/${containerId}/yaml`);
+      const data = await response.json();
+      setContainerYaml(data.yaml);
+    } catch (err) {
+      console.error('Failed to fetch container YAML:', err);
+    }
+  };
+
+  const handleContainerAction = async (action, containerId) => {
+    try {
+      const response = await fetch(`${backendUrl}/api/containers/${containerId}/${action}`, {
+        method: 'POST'
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        // Show success notification
+        setNotifications(prev => [{
+          id: `action-${Date.now()}`,
+          type: 'success',
+          title: 'Container Action',
+          message: result.message,
+          created_at: new Date().toISOString(),
+          read: false
+        }, ...prev]);
+        
+        // Refresh data
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Failed to perform container action:', err);
+    }
+  };
     setSelectedContainer(container);
     setShowDetailModal(true);
     await fetchContainerStats(container.id);
