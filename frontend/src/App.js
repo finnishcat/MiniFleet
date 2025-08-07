@@ -592,9 +592,30 @@ networks:
         {/* Right Sidebar */}
         <div className="w-80 bg-gray-800 bg-opacity-90 backdrop-blur-sm p-6 overflow-y-auto">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-white mb-2">Docker Monitor</h1>
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-2xl font-bold text-white">Docker Monitor</h1>
+              <button
+                onClick={() => setShowServerModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+              >
+                ⚙️ Servers
+              </button>
+            </div>
             <div className="text-gray-300">
-              <p className="text-sm">Server: localhost</p>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm">Server:</span>
+                <select
+                  value={activeServer}
+                  onChange={(e) => switchServer(e.target.value)}
+                  className="bg-gray-700 text-white text-sm px-2 py-1 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+                >
+                  {dockerServers.map(server => (
+                    <option key={server.id} value={server.id}>
+                      {server.name} {server.connected ? '✅' : '❌'}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <p className="text-sm">Docker: {dockerStatus?.server_version}</p>
               {dockerStatus?.status === 'demo' && (
                 <p className="text-xs text-yellow-400 mt-1">⚠️ Demo Mode - Mock Data</p>
