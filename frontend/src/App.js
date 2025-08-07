@@ -175,13 +175,14 @@ function App() {
       setError(null);
 
       // For demo purposes, if Docker is not available, show mock data
-      const statusResponse = await fetch(`${backendUrl}/api/docker/status`);
+      const statusResponse = await fetch(`${backendUrl}/api/docker/status?server_id=${activeServer}`);
       
       if (statusResponse.status === 503) {
         // Show mock data for demo
         console.log('Docker not available, showing demo data...');
         setDockerStatus({
           status: "demo",
+          server_id: activeServer,
           containers_running: 3,
           containers_stopped: 1,
           images: 5,
@@ -189,7 +190,7 @@ function App() {
           architecture: "x86_64"
         });
         
-        // Mock containers
+        // Mock containers with server info
         setContainers([
           {
             id: "demo-nginx",
@@ -198,7 +199,8 @@ function App() {
             status: "running",
             state: "running",
             uptime: "2h 15m",
-            short_id: "abc123"
+            short_id: "abc123",
+            server_id: activeServer
           },
           {
             id: "demo-postgres",
@@ -207,7 +209,8 @@ function App() {
             status: "running",
             state: "running",
             uptime: "1d 5h",
-            short_id: "def456"
+            short_id: "def456",
+            server_id: activeServer
           },
           {
             id: "demo-redis",
@@ -216,7 +219,8 @@ function App() {
             status: "running",
             state: "running",
             uptime: "3h 22m",
-            short_id: "ghi789"
+            short_id: "ghi789",
+            server_id: activeServer
           },
           {
             id: "demo-stopped",
@@ -225,11 +229,12 @@ function App() {
             status: "exited",
             state: "exited",
             uptime: null,
-            short_id: "jkl012"
+            short_id: "jkl012",
+            server_id: activeServer
           }
         ]);
         
-        // Mock images
+        // Mock images with server info
         setImages([
           {
             id: "img-nginx",
@@ -238,7 +243,8 @@ function App() {
             created: "2024-01-15T10:30:00Z",
             size: 142000000,
             virtual_size: 142000000,
-            architecture: "amd64"
+            architecture: "amd64",
+            server_id: activeServer
           },
           {
             id: "img-postgres",
@@ -247,7 +253,8 @@ function App() {
             created: "2024-01-10T08:15:00Z",
             size: 374000000,
             virtual_size: 374000000,
-            architecture: "amd64"
+            architecture: "amd64",
+            server_id: activeServer
           },
           {
             id: "img-redis",
@@ -256,7 +263,8 @@ function App() {
             created: "2024-01-08T14:22:00Z",
             size: 117000000,
             virtual_size: 117000000,
-            architecture: "amd64"
+            architecture: "amd64",
+            server_id: activeServer
           },
           {
             id: "img-node",
@@ -265,7 +273,8 @@ function App() {
             created: "2024-01-05T16:45:00Z",
             size: 169000000,
             virtual_size: 169000000,
-            architecture: "amd64"
+            architecture: "amd64",
+            server_id: activeServer
           },
           {
             id: "img-ubuntu",
@@ -274,7 +283,8 @@ function App() {
             created: "2024-01-01T12:00:00Z",
             size: 72000000,
             virtual_size: 72000000,
-            architecture: "amd64"
+            architecture: "amd64",
+            server_id: activeServer
           }
         ]);
         
@@ -288,13 +298,13 @@ function App() {
       setDockerStatus(statusData);
 
       // Fetch containers
-      const containersResponse = await fetch(`${backendUrl}/api/containers`);
+      const containersResponse = await fetch(`${backendUrl}/api/containers?server_id=${activeServer}`);
       if (!containersResponse.ok) throw new Error('Failed to fetch containers');
       const containersData = await containersResponse.json();
       setContainers(containersData.containers);
 
       // Fetch images
-      const imagesResponse = await fetch(`${backendUrl}/api/images`);
+      const imagesResponse = await fetch(`${backendUrl}/api/images?server_id=${activeServer}`);
       if (!imagesResponse.ok) throw new Error('Failed to fetch images');
       const imagesData = await imagesResponse.json();
       setImages(imagesData.images);
