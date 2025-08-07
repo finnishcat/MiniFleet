@@ -749,8 +749,18 @@ networks:
                         <p className="text-xs">{imageUpdates[image.tag].available_tags.length} new tags</p>
                       </div>
                     )}
-                    <div className="mt-3 pt-3 border-t border-gray-700">
-                      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors">
+                    <div className="mt-3 pt-3 border-t border-gray-700 space-y-2">
+                      <button 
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedImage(image);
+                          setShowDeployModal(true);
+                        }}
+                      >
+                        🚀 Deploy Container
+                      </button>
+                      <button className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded transition-colors">
                         Manage Image
                       </button>
                     </div>
