@@ -9,7 +9,12 @@ function App() {
   const [selectedContainer, setSelectedContainer] = useState(null);
   const [containerStats, setContainerStats] = useState({});
   const [containerLogs, setContainerLogs] = useState('');
+  const [containerYaml, setContainerYaml] = useState('');
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailTab, setDetailTab] = useState('overview');
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [imageUpdates, setImageUpdates] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
