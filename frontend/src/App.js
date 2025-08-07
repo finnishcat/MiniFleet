@@ -1,6 +1,184 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
+// Deployment Form Component
+function DeploymentForm({ image, onDeploy, onCancel }) {
+  const [containerName, setContainerName] = useState('');
+  const [ports, setPorts] = useState(['']);
+  const [environment, setEnvironment] = useState(['']);
+  const [volumes, setVolumes] = useState(['']);
+  const [selectedTag, setSelectedTag] = useState('latest');
+
+  useEffect(() => {
+    if (image?.tag) {
+      const imageParts = image.tag.split(':');
+      if (imageParts.length > 1) {
+        setSelectedTag(imageParts[1]);
+      }
+      // Suggest container name based on image
+      const baseName = imageParts[0].split('/').pop();
+      setContainerName(`${baseName}-${Date.now().toString().slice(-4)}`);
+    }
+  }, [image]);
+
+  const addField = (setter, current) => {
+    setter([...current, '']);
+  };
+
+  const updateField = (setter, current, index, value) => {
+    const updated = [...current];
+    updated[index] = value;
+    setter(updated);
+  };
+
+  const removeField = (setter, current, index) => {
+    setter(current.filter((_, i) => i !== index));
+  };
+
+  const handleDeploy = () => {
+    const [imageRepo] = image.tag.split(':');
+    const deploymentConfig = {
+      image: imageRepo,
+      tag: selectedTag,
+      container_name: containerName,
+      ports: ports.filter(p => p.trim()),
+      environment: environment.filter(e => e.trim()),
+      volumes: volumes.filter(v => v.trim())
+    };
+    
+    onDeploy(deploymentConfig);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-gray-700 p-4 rounded-lg">
+        <h3 className="text-white font-semibold mb-2">Image: {image.tag}</h3>
+        <p className="text-gray-300 text-sm">Size: {(image.size / 1024 / 1024).toFixed(2)} MB</p>
+        <p className="text-gray-300 text-sm">Architecture: {image.architecture}</p>
+      </div>
+
+      <div>
+        <label className="block text-white text-sm font-medium mb-2">Container Name</label>
+        <input
+          type="text"
+          value={containerName}
+          onChange={(e) => setContainerName(e.target.value)}
+          className="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+          placeholder="my-container"
+        />
+      </div>
+
+      <div>
+        <label className="block text-white text-sm font-medium mb-2">Tag Version</label>
+        <input
+          type="text"
+          value={selectedTag}
+          onChange={(e) => setSelectedTag(e.target.value)}
+          className="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+          placeholder="latest"
+        />
+      </div>
+
+      <div>
+        <label className="block text-white text-sm font-medium mb-2">Port Mappings</label>
+        {ports.map((port, index) => (
+          <div key={index} className="flex space-x-2 mb-2">
+            <input
+              type="text"
+              value={port}
+              onChange={(e) => updateField(setPorts, ports, index, e.target.value)}
+              className="flex-1 bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+              placeholder="8080:80"
+            />
+            <button
+              onClick={() => removeField(setPorts, ports, index)}
+              className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          onClick={() => addField(setPorts, ports)}
+          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+        >
+          + Add Port
+        </button>
+      </div>
+
+      <div>
+        <label className="block text-white text-sm font-medium mb-2">Environment Variables</label>
+        {environment.map((env, index) => (
+          <div key={index} className="flex space-x-2 mb-2">
+            <input
+              type="text"
+              value={env}
+              onChange={(e) => updateField(setEnvironment, environment, index, e.target.value)}
+              className="flex-1 bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+              placeholder="KEY=value"
+            />
+            <button
+              onClick={() => removeField(setEnvironment, environment, index)}
+              className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          onClick={() => addField(setEnvironment, environment)}
+          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+        >
+          + Add Environment
+        </button>
+      </div>
+
+      <div>
+        <label className="block text-white text-sm font-medium mb-2">Volume Mounts</label>
+        {volumes.map((volume, index) => (
+          <div key={index} className="flex space-x-2 mb-2">
+            <input
+              type="text"
+              value={volume}
+              onChange={(e) => updateField(setVolumes, volumes, index, e.target.value)}
+              className="flex-1 bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+              placeholder="/host/path:/container/path"
+            />
+            <button
+              onClick={() => removeField(setVolumes, volumes, index)}
+              className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          onClick={() => addField(setVolumes, volumes)}
+          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+        >
+          + Add Volume
+        </button>
+      </div>
+
+      <div className="flex space-x-3 pt-4">
+        <button
+          onClick={onCancel}
+          className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleDeploy}
+          disabled={!containerName.trim()}
+          className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-500 text-white py-3 px-4 rounded transition-colors"
+        >
+          🚀 Deploy Container
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [containers, setContainers] = useState([]);
   const [images, setImages] = useState([]);
