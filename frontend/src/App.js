@@ -240,6 +240,21 @@ function App() {
 
   const fetchContainerStats = async (containerId) => {
     try {
+      if (dockerStatus?.status === 'demo') {
+        // Mock stats for demo
+        setContainerStats({
+          cpu_percent: Math.random() * 50,
+          memory_usage: Math.random() * 1000000000,
+          memory_limit: 2000000000,
+          memory_percent: Math.random() * 30,
+          network_rx: Math.random() * 1000000,
+          network_tx: Math.random() * 500000,
+          block_read: Math.random() * 10000000,
+          block_write: Math.random() * 5000000
+        });
+        return;
+      }
+
       const response = await fetch(`${backendUrl}/api/containers/${containerId}/stats`);
       const data = await response.json();
       setContainerStats(data);
@@ -250,6 +265,18 @@ function App() {
 
   const fetchContainerLogs = async (containerId) => {
     try {
+      if (dockerStatus?.status === 'demo') {
+        // Mock logs for demo
+        setContainerLogs(`2024-01-15T10:30:00.123456Z Starting ${containerId}...
+2024-01-15T10:30:01.123456Z Configuration loaded successfully
+2024-01-15T10:30:02.123456Z Server listening on port 80
+2024-01-15T10:30:03.123456Z Ready to accept connections
+2024-01-15T10:32:15.123456Z GET /health - 200 OK
+2024-01-15T10:35:22.123456Z GET /api/status - 200 OK
+2024-01-15T10:38:45.123456Z Connection from 192.168.1.100`);
+        return;
+      }
+
       const response = await fetch(`${backendUrl}/api/containers/${containerId}/logs`);
       const data = await response.json();
       setContainerLogs(data.logs);
@@ -260,6 +287,30 @@ function App() {
 
   const fetchContainerYaml = async (containerId) => {
     try {
+      if (dockerStatus?.status === 'demo') {
+        // Mock YAML for demo
+        setContainerYaml(`version: '3.8'
+services:
+  ${containerId}:
+    image: nginx:latest
+    container_name: ${containerId}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./html:/usr/share/nginx/html
+    networks:
+      - webnet
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+
+networks:
+  webnet:
+    driver: bridge`);
+        return;
+      }
+
       const response = await fetch(`${backendUrl}/api/containers/${containerId}/yaml`);
       const data = await response.json();
       setContainerYaml(data.yaml);
@@ -270,6 +321,19 @@ function App() {
 
   const handleContainerAction = async (action, containerId) => {
     try {
+      if (dockerStatus?.status === 'demo') {
+        // Mock action for demo
+        setNotifications(prev => [{
+          id: `action-${Date.now()}`,
+          type: 'success',
+          title: 'Container Action (Demo)',
+          message: `Would ${action} container ${containerId}`,
+          created_at: new Date().toISOString(),
+          read: false
+        }, ...prev]);
+        return;
+      }
+
       const response = await fetch(`${backendUrl}/api/containers/${containerId}/${action}`, {
         method: 'POST'
       });
@@ -297,10 +361,10 @@ function App() {
   const handleContainerClick = async (container) => {
     setSelectedContainer(container);
     setShowDetailModal(true);
+    setDetailTab('overview');
     await fetchContainerStats(container.id);
     await fetchContainerLogs(container.id);
     await fetchContainerYaml(container.id);
-  };
   };
 
   const getContainerIcon = (imageName) => {
@@ -394,6 +458,56 @@ function App() {
           <span className="font-medium">🚧 Demo Mode</span> - Showing mock data since Docker is not available in this environment
         </div>
       )}
+      
+      {/* Notifications Bell */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={() => setShowNotifications(!showNotifications)}
+          className="relative bg-gray-800 bg-opacity-90 text-white p-3 rounded-full hover:bg-opacity-100 transition-all"
+        >
+          <span className="text-xl">🔔</span>
+          {notifications.filter(n => !n.read).length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              {notifications.filter(n => !n.read).length}
+            </span>
+          )}
+        </button>
+        
+        {/* Notifications Panel */}
+        {showNotifications && (
+          <div className="absolute right-0 mt-2 w-80 bg-gray-800 bg-opacity-95 backdrop-blur-sm rounded-lg shadow-lg max-h-96 overflow-y-auto">
+            <div className="p-4 border-b border-gray-700">
+              <h3 className="text-white font-semibold">Notifications</h3>
+            </div>
+            {notifications.length === 0 ? (
+              <div className="p-4 text-gray-400 text-center">No notifications</div>
+            ) : (
+              notifications.slice(0, 10).map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`p-4 border-b border-gray-700 ${!notification.read ? 'bg-blue-900 bg-opacity-30' : ''}`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h4 className="text-white font-medium text-sm">{notification.title}</h4>
+                      <p className="text-gray-300 text-xs mt-1">{notification.message}</p>
+                      <p className="text-gray-500 text-xs mt-1">
+                        {new Date(notification.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="text-lg ml-2">
+                      {notification.type === 'image_update' && '🔄'}
+                      {notification.type === 'success' && '✅'}
+                      {notification.type === 'error' && '❌'}
+                      {notification.type === 'info' && 'ℹ️'}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
       
       <div className="flex min-h-screen">
         {/* Right Sidebar */}
@@ -491,6 +605,13 @@ function App() {
                   console.log('Image clicked:', image);
                 }}
               >
+                {/* Update indicator */}
+                {imageUpdates[image.tag] && (
+                  <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
+                    ↑
+                  </div>
+                )}
+
                 <div className="flex items-start justify-between mb-4">
                   <div className="text-4xl">{getContainerIcon(image.tag)}</div>
                   <div className="text-gray-400 text-sm">
@@ -522,6 +643,12 @@ function App() {
                       <span>Virtual Size:</span>
                       <span>{formatBytes(image.virtual_size)}</span>
                     </div>
+                    {imageUpdates[image.tag] && (
+                      <div className="mt-2 p-2 bg-orange-100 bg-opacity-20 rounded text-orange-300">
+                        <p className="text-xs">Updates available!</p>
+                        <p className="text-xs">{imageUpdates[image.tag].available_tags.length} new tags</p>
+                      </div>
+                    )}
                     <div className="mt-3 pt-3 border-t border-gray-700">
                       <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors">
                         Manage Image
@@ -535,86 +662,248 @@ function App() {
         </div>
       </div>
 
-      {/* Container Detail Modal */}
+      {/* Enhanced Container Detail Modal */}
       {showDetailModal && selectedContainer && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white">
-                {getContainerIcon(selectedContainer.image)} {selectedContainer.name}
-              </h2>
-              <button
-                onClick={() => setShowDetailModal(false)}
-                className="text-gray-400 hover:text-white text-2xl"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Container Info */}
-              <div className="bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4">Container Info</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-300">Status:</span>
-                    <span className={getStatusColor(selectedContainer.status)}>
-                      {selectedContainer.status}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-300">Image:</span>
-                    <span className="text-white">{selectedContainer.image}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-300">ID:</span>
-                    <span className="text-white font-mono">{selectedContainer.short_id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-300">Uptime:</span>
-                    <span className="text-white">{formatUptime(selectedContainer.uptime)}</span>
-                  </div>
+          <div className="bg-gray-800 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden m-4">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-700">
+              <div className="flex items-center space-x-3">
+                <span className="text-3xl">{getContainerIcon(selectedContainer.image)}</span>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">{selectedContainer.name}</h2>
+                  <p className="text-gray-400">{selectedContainer.image}</p>
                 </div>
               </div>
-
-              {/* Resource Usage */}
-              <div className="bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4">Resource Usage</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-300">CPU:</span>
-                    <span className="text-white">{containerStats.cpu_percent || 0}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-300">Memory:</span>
-                    <span className="text-white">
-                      {formatBytes(containerStats.memory_usage || 0)} / {formatBytes(containerStats.memory_limit || 0)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-300">Memory %:</span>
-                    <span className="text-white">{containerStats.memory_percent || 0}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-300">Network RX:</span>
-                    <span className="text-white">{formatBytes(containerStats.network_rx || 0)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-300">Network TX:</span>
-                    <span className="text-white">{formatBytes(containerStats.network_tx || 0)}</span>
-                  </div>
-                </div>
+              <div className="flex items-center space-x-2">
+                {/* Action buttons */}
+                {selectedContainer.status === 'running' ? (
+                  <>
+                    <button
+                      onClick={() => handleContainerAction('restart', selectedContainer.id)}
+                      className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded text-sm transition-colors"
+                    >
+                      Restart
+                    </button>
+                    <button
+                      onClick={() => handleContainerAction('stop', selectedContainer.id)}
+                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm transition-colors"
+                    >
+                      Stop
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => handleContainerAction('start', selectedContainer.id)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm transition-colors"
+                  >
+                    Start
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="text-gray-400 hover:text-white text-2xl ml-4"
+                >
+                  ×
+                </button>
               </div>
             </div>
 
-            {/* Logs */}
-            <div className="mt-6 bg-gray-700 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">Logs (Last 100 lines)</h3>
-              <div className="bg-gray-900 rounded p-4 max-h-64 overflow-y-auto">
-                <pre className="text-sm text-gray-300 whitespace-pre-wrap">
-                  {containerLogs || 'No logs available'}
-                </pre>
-              </div>
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-700">
+              {['overview', 'logs', 'stats', 'yaml'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setDetailTab(tab)}
+                  className={`px-6 py-3 text-sm font-medium capitalize ${
+                    detailTab === tab
+                      ? 'border-b-2 border-blue-500 text-white bg-gray-700'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {detailTab === 'overview' && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Container Info */}
+                  <div className="bg-gray-700 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-white mb-4">Container Info</h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Status:</span>
+                        <span className={getStatusColor(selectedContainer.status)}>
+                          {selectedContainer.status}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Image:</span>
+                        <span className="text-white">{selectedContainer.image}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">ID:</span>
+                        <span className="text-white font-mono">{selectedContainer.short_id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Uptime:</span>
+                        <span className="text-white">{formatUptime(selectedContainer.uptime)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Created:</span>
+                        <span className="text-white">
+                          {new Date(selectedContainer.created).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Stats */}
+                  <div className="bg-gray-700 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-white mb-4">Resource Usage</h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">CPU:</span>
+                        <span className="text-white">{containerStats.cpu_percent || 0}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Memory:</span>
+                        <span className="text-white">
+                          {formatBytes(containerStats.memory_usage || 0)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Memory %:</span>
+                        <span className="text-white">{containerStats.memory_percent || 0}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Network RX:</span>
+                        <span className="text-white">{formatBytes(containerStats.network_rx || 0)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Network TX:</span>
+                        <span className="text-white">{formatBytes(containerStats.network_tx || 0)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {detailTab === 'logs' && (
+                <div className="bg-gray-900 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-white">Container Logs</h3>
+                    <button
+                      onClick={() => fetchContainerLogs(selectedContainer.id)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+                  <div className="bg-black rounded p-4 max-h-96 overflow-y-auto">
+                    <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono">
+                      {containerLogs || 'No logs available'}
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {detailTab === 'stats' && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* CPU Usage */}
+                    <div className="bg-gray-700 rounded-lg p-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-blue-400">
+                          {containerStats.cpu_percent ? containerStats.cpu_percent.toFixed(1) : '0'}%
+                        </div>
+                        <div className="text-gray-300 text-sm">CPU Usage</div>
+                      </div>
+                    </div>
+
+                    {/* Memory Usage */}
+                    <div className="bg-gray-700 rounded-lg p-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-green-400">
+                          {containerStats.memory_percent ? containerStats.memory_percent.toFixed(1) : '0'}%
+                        </div>
+                        <div className="text-gray-300 text-sm">Memory Usage</div>
+                      </div>
+                    </div>
+
+                    {/* Network RX */}
+                    <div className="bg-gray-700 rounded-lg p-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-purple-400">
+                          {formatBytes(containerStats.network_rx || 0)}
+                        </div>
+                        <div className="text-gray-300 text-sm">Network RX</div>
+                      </div>
+                    </div>
+
+                    {/* Network TX */}
+                    <div className="bg-gray-700 rounded-lg p-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-orange-400">
+                          {formatBytes(containerStats.network_tx || 0)}
+                        </div>
+                        <div className="text-gray-300 text-sm">Network TX</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Stats */}
+                  <div className="bg-gray-700 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-white mb-4">Detailed Statistics</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Memory Limit:</span>
+                          <span className="text-white">{formatBytes(containerStats.memory_limit || 0)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Block Read:</span>
+                          <span className="text-white">{formatBytes(containerStats.block_read || 0)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Block Write:</span>
+                          <span className="text-white">{formatBytes(containerStats.block_write || 0)}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Last Updated:</span>
+                          <span className="text-white">
+                            {containerStats.timestamp ? new Date(containerStats.timestamp).toLocaleTimeString() : 'N/A'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {detailTab === 'yaml' && (
+                <div className="bg-gray-900 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-white">Docker Compose YAML</h3>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(containerYaml)}
+                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Copy YAML
+                    </button>
+                  </div>
+                  <div className="bg-black rounded p-4 max-h-96 overflow-y-auto">
+                    <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono">
+                      {containerYaml || 'Loading YAML configuration...'}
+                    </pre>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
