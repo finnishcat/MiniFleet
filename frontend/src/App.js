@@ -25,6 +25,13 @@ function App() {
     fetchBackgroundImage();
   }, []);
 
+  // Fetch data periodically
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   // Fetch notifications
   useEffect(() => {
     fetchNotifications();
