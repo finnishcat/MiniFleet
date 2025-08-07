@@ -15,6 +15,11 @@ function App() {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [imageUpdates, setImageUpdates] = useState({});
+  const [dockerServers, setDockerServers] = useState([]);
+  const [activeServer, setActiveServer] = useState('local');
+  const [showServerModal, setShowServerModal] = useState(false);
+  const [showDeployModal, setShowDeployModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
