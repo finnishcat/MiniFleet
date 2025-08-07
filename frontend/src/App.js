@@ -299,6 +299,8 @@ function App() {
     setShowDetailModal(true);
     await fetchContainerStats(container.id);
     await fetchContainerLogs(container.id);
+    await fetchContainerYaml(container.id);
+  };
   };
 
   const getContainerIcon = (imageName) => {
