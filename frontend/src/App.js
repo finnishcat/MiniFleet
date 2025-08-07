@@ -92,6 +92,8 @@ function App() {
       console.error('Failed to check image updates:', err);
     }
   };
+
+  const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
