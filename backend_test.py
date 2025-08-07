@@ -117,6 +117,26 @@ class DockerMonitorAPITester(unittest.TestCase):
             print(f"❌ Container logs API test failed: {str(e)}")
             return False
 
+    def test_06_background_image(self):
+        """Test background image endpoint"""
+        print("\n🔍 Testing background image API...")
+        
+        try:
+            response = requests.get(f"{self.local_url}/api/background-image")
+            self.assertEqual(response.status_code, 200, "Expected status code 200")
+            
+            data = response.json()
+            self.assertIn("image_url", data, "Response should contain 'image_url' field")
+            self.assertTrue(data["image_url"].startswith("https://"), "Image URL should be HTTPS")
+            
+            print(f"   Background image URL: {data['image_url']}")
+            print("✅ Background image API test passed")
+            return True
+        
+        except Exception as e:
+            print(f"❌ Background image API test failed: {str(e)}")
+            return False
+
     # ========== NEW MULTI-SERVER MANAGEMENT TESTS ==========
     
     def test_07_get_docker_servers(self):
