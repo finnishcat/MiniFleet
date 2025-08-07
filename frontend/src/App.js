@@ -218,7 +218,7 @@ function App() {
     fetchData();
     const interval = setInterval(fetchData, 5000); // Refresh every 5 seconds
     return () => clearInterval(interval);
-  }, []);
+  }, [activeServer]); // Re-fetch when active server changes
 
   // Fetch notifications
   useEffect(() => {
