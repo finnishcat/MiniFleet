@@ -1018,6 +1018,84 @@ networks:
           </div>
         </div>
       )}
+
+      {/* Server Management Modal */}
+      {showServerModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full m-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Docker Servers</h2>
+              <button
+                onClick={() => setShowServerModal(false)}
+                className="text-gray-400 hover:text-white text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {dockerServers.map(server => (
+                <div key={server.id} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+                  <div>
+                    <h3 className="text-white font-semibold">{server.name}</h3>
+                    <p className="text-gray-400 text-sm">{server.host}:{server.port}</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className={`text-sm ${server.connected ? 'text-green-400' : 'text-red-400'}`}>
+                      {server.connected ? '✅ Connected' : '❌ Disconnected'}
+                    </span>
+                    <button
+                      onClick={() => switchServer(server.id)}
+                      className={`px-3 py-1 rounded text-sm ${
+                        activeServer === server.id 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-600 hover:bg-gray-500 text-white'
+                      }`}
+                    >
+                      {activeServer === server.id ? 'Active' : 'Switch'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowServerModal(false)}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded mr-3"
+              >
+                Close
+              </button>
+              <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                Add Server
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Container Deployment Modal */}
+      {showDeployModal && selectedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full m-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Deploy Container</h2>
+              <button
+                onClick={() => setShowDeployModal(false)}
+                className="text-gray-400 hover:text-white text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <DeploymentForm
+              image={selectedImage}
+              onDeploy={deployContainer}
+              onCancel={() => setShowDeployModal(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
