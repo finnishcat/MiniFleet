@@ -25,12 +25,19 @@ function App() {
     fetchBackgroundImage();
   }, []);
 
-  // Fetch data periodically
+  // Fetch notifications
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 5000); // Refresh every 5 seconds
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000); // Check every 30 seconds
     return () => clearInterval(interval);
   }, []);
+
+  // Check for image updates periodically
+  useEffect(() => {
+    if (images.length > 0 && dockerStatus?.status !== 'demo') {
+      checkImageUpdates();
+    }
+  }, [images]);
 
   const fetchBackgroundImage = async () => {
     try {
