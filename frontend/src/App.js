@@ -293,6 +293,8 @@ function App() {
       console.error('Failed to perform container action:', err);
     }
   };
+
+  const handleContainerClick = async (container) => {
     setSelectedContainer(container);
     setShowDetailModal(true);
     await fetchContainerStats(container.id);
