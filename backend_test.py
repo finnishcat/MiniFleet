@@ -440,17 +440,41 @@ class DockerMonitorAPITester(unittest.TestCase):
 
     def run_all_tests(self):
         """Run all API tests"""
-        print("\n🚀 Starting Docker Monitor API Tests")
+        print("\n🚀 Starting Docker Monitor API Tests - Enhanced Multi-Server Edition")
         print(f"Local URL: {self.local_url}")
-        print("=" * 50)
+        print("=" * 70)
         
         tests = [
+            # Original tests
             self.test_01_docker_status,
             self.test_02_containers,
             self.test_03_images,
             self.test_04_container_stats,
             self.test_05_container_logs,
-            self.test_06_background_image
+            self.test_06_background_image,
+            
+            # New multi-server management tests
+            self.test_07_get_docker_servers,
+            self.test_08_add_docker_server,
+            self.test_09_delete_docker_server,
+            
+            # Registry management tests
+            self.test_10_get_registries,
+            self.test_11_add_registry,
+            
+            # Enhanced image management tests
+            self.test_12_get_image_tags,
+            
+            # Advanced container deployment tests
+            self.test_13_deploy_container,
+            
+            # Multi-server aware endpoint tests
+            self.test_14_docker_status_with_server_id,
+            self.test_15_containers_with_server_id,
+            self.test_16_images_with_server_id,
+            
+            # Notifications tests
+            self.test_17_notifications
         ]
         
         results = []
@@ -460,7 +484,7 @@ class DockerMonitorAPITester(unittest.TestCase):
         success_count = results.count(True)
         total_count = len(results)
         
-        print("\n" + "=" * 50)
+        print("\n" + "=" * 70)
         print(f"📊 Test Results: {success_count}/{total_count} tests passed")
         
         if success_count == total_count:
