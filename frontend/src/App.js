@@ -30,6 +30,11 @@ function App() {
     fetchBackgroundImage();
   }, []);
 
+  // Fetch Docker servers
+  useEffect(() => {
+    fetchDockerServers();
+  }, []);
+
   // Fetch data periodically
   useEffect(() => {
     fetchData();
